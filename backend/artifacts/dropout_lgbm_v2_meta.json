@@ -1,0 +1,83 @@
+{
+  "model_version": "dropout_lgbm_v2",
+  "features": [
+    "login_count",
+    "total_time_seconds",
+    "materials_accessed",
+    "forum_interactions",
+    "inactivity_days",
+    "avg_score_evaluations",
+    "late_submissions_count",
+    "academic_term",
+    "course_code"
+  ],
+  "thresholds": {
+    "best_f1": 0.36766188964217866,
+    "medium": 0.11495165993677514,
+    "high": 0.4480472212901124
+  },
+  "metrics": {
+    "test_roc_auc": 0.8457546315852996,
+    "test_pr_auc": 0.6409586627373505,
+    "test_prevalence": 0.24333333333333335,
+    "test_f1": 0.593103448275862,
+    "test_recall": 0.589041095890411,
+    "test_precision": 0.5972222222222222,
+    "recall_at_medium": 0.8493150684931506,
+    "precision_at_high": 0.6724137931034483
+  },
+  "threshold_selection": {
+    "method": "5-fold out-of-fold predictions on training split",
+    "minimum_medium_recall": 0.85,
+    "minimum_high_precision": 0.6,
+    "candidate_thresholds": {
+      "medium": 0.32,
+      "high": 0.61
+    },
+    "candidate_thresholds_accepted": false,
+    "candidate_oof_metrics": {
+      "medium": {
+        "precision": 0.5417867435158501,
+        "recall": 0.6438356164383562,
+        "predicted_positive": 347
+      },
+      "high": {
+        "precision": 0.6524390243902439,
+        "recall": 0.3664383561643836,
+        "predicted_positive": 164
+      }
+    },
+    "test_threshold_metrics": {
+      "selected": {
+        "medium": {
+          "precision": 0.43661971830985913,
+          "recall": 0.8493150684931506,
+          "predicted_positive": 142
+        },
+        "high": {
+          "precision": 0.6724137931034483,
+          "recall": 0.5342465753424658,
+          "predicted_positive": 58
+        }
+      },
+      "candidate": {
+        "medium": {
+          "precision": 0.5783132530120482,
+          "recall": 0.6575342465753424,
+          "predicted_positive": 83
+        },
+        "high": {
+          "precision": 0.75,
+          "recall": 0.410958904109589,
+          "predicted_positive": 40
+        }
+      }
+    },
+    "precision_recall_plot": "dropout_lgbm_v2_precision_recall.png"
+  },
+  "versions": {
+    "sklearn": "1.9.1",
+    "lightgbm": "4.7.0",
+    "shap": "0.52.0"
+  }
+}

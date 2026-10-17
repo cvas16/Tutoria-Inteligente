@@ -1,0 +1,61 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: its-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-its_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-its_db}
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:?Define SEED_DEMO_PASSWORD para usuarios de demostración}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./backend/db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: its-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-its_user}:${POSTGRES_PASSWORD:?Define POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-its_db}
+      JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET}
+      API_KEY: ${API_KEY:?Define API_KEY}
+      ARTIFACTS_DIR: /app/artifacts
+      ENVIRONMENT: production
+      PORT: 8000
+      WEB_CONCURRENCY: 2
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    container_name: its-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      BACKEND_INTERNAL_URL: http://backend:8000/api/v1
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      API_KEY: ${API_KEY:?Define API_KEY}
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
